@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AETHERIA // 3D Interactive Parallax Experience</title>
+  <meta name="description" content="A breathtaking 3D interactive parallax scrolling journey through multidimensional space using WebGL, Three.js, and physics-driven motion.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <!-- External Libraries -->
+  <!-- Three.js for 3D WebGL -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- Lenis for ultra-smooth inertia scroll -->
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="nebula">
+  
+  <!-- Custom 3D Cursor -->
+  <div class="cursor-dot" id="cursor-dot"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- Ambient Audio Engine Toggle & Telemetry Pill -->
+  <div class="nav-container">
+    <header class="glass-nav">
+      <div class="brand">
+        <span class="brand-glyph">✦</span>
+        <span class="brand-text">AETHERIA<span class="brand-sub">/ 3D</span></span>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#hero" class="nav-link active" data-nav="0">01 // Genesis</a>
+        <a href="#quantum" class="nav-link" data-nav="1">02 // Core</a>
+        <a href="#monoliths" class="nav-link" data-nav="2">03 // Monoliths</a>
+        <a href="#continuum" class="nav-link" data-nav="3">04 // Continuum</a>
+        <a href="#singularity" class="nav-link" data-nav="4">05 // Singularity</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Audio Synth Toggle -->
+        <button id="audio-toggle" class="nav-btn" title="Toggle Spatial Audio Synth" aria-label="Toggle Sound">
+          <span class="sound-wave">
+            <span></span><span></span><span></span><span></span>
+          </span>
+          <span class="sound-label">AUDIO OFF</span>
+        </button>
+
+        <!-- Theme Quick Selector -->
+        <div class="theme-dropdown-trigger" id="theme-btn">
+          <i data-lucide="palette"></i>
+          <span>THEME</span>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <!-- Theme Selector Modal / Pill -->
+  <div class="theme-picker-panel" id="theme-panel">
+    <div class="theme-panel-title">SELECT DIMENSION SHADER</div>
+    <div class="theme-options">
+      <button class="theme-btn active" data-set-theme="nebula">
+        <span class="swatch nebula"></span>
+        <span class="theme-name">Hyper Nebula</span>
+      </button>
+      <button class="theme-btn" data-set-theme="cyber">
+        <span class="swatch cyber"></span>
+        <span class="theme-name">Matrix Jade</span>
+      </button>
+      <button class="theme-btn" data-set-theme="solar">
+        <span class="swatch solar"></span>
+        <span class="theme-name">Solar Flare</span>
+      </button>
+      <button class="theme-btn" data-set-theme="obsidian">
+        <span class="swatch obsidian"></span>
+        <span class="theme-name">Obsidian Gold</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- HUD Telemetry Overlay (Fixed) -->
+  <aside class="hud-sidebar" aria-hidden="true">
+    <div class="hud-item">
+      <span class="hud-label">DEPTH LEVEL</span>
+      <span class="hud-value" id="hud-depth">0.000 LY</span>
+    </div>
+    <div class="hud-divider"></div>
+    <div class="hud-item">
+      <span class="hud-label">WARP FACTOR</span>
+      <span class="hud-value" id="hud-velocity">1.000c</span>
+    </div>
+    <div class="hud-divider"></div>
+    <div class="hud-item">
+      <span class="hud-label">FPS ENGINE</span>
+      <span class="hud-value" id="hud-fps">60 FPS</span>
+    </div>
+    
+    <!-- Mini Progress Line -->
+    <div class="hud-progress-track">
+      <div class="hud-progress-fill" id="hud-progress-fill"></div>
+    </div>
+  </aside>
+
+  <!-- Interactive 3D WebGL Canvas Layer (Fixed) -->
+  <div id="canvas-container">
+    <canvas id="webgl-canvas"></canvas>
+  </div>
+
+  <!-- Background Layered Atmospheric Parallax Shimmers -->
+  <div class="parallax-bg-layer" id="bg-nebula-glow"></div>
+  <div class="parallax-grid-lines"></div>
+
+  <!-- SCROLLABLE PAGE CONTENT (Multi-layer Parallax) -->
+  <main id="smooth-wrapper">
+
+    <!-- ==============================================
+         SECTION 1: HERO // GENESIS
+    =============================================== -->
+    <section class="section hero-section" id="hero" data-index="0">
+      <div class="parallax-decor p-hero-ring" data-speed="-0.3">
+        <div class="hologram-ring"></div>
+      </div>
+      <div class="parallax-decor p-hero-badge" data-speed="0.6">
+        <div class="telemetry-badge">
+          <span class="pulse-dot"></span>
+          <span>DIMENSIONAL ANCHOR : 37.77°N 122.41°W</span>
+        </div>
+      </div>
+
+      <div class="hero-content">
+        <div class="hero-tagline" data-speed="0.1">
+          <span class="tag-accent">//</span> DEEP DIMENSIONAL EXPEDITION
+        </div>
+        
+        <h1 class="hero-title" data-speed="0.25">
+          <span class="hero-line block text-gradient-main">TRANSCEND</span>
+          <span class="hero-line block stroke-text">PERCEPTION</span>
+        </h1>
+
+        <p class="hero-description" data-speed="0.35">
+          An interactive 3D parallax odyssey through reactive WebGL space, physics-anchored kinetic layers, and high-frequency dimensional horizons.
+        </p>
+
+        <div class="hero-cta-group" data-speed="0.45">
+          <a href="#quantum" class="cta-primary magnetic-btn">
+            <span class="btn-text">INITIATE DESCENT</span>
+            <span class="btn-icon"><i data-lucide="arrow-down-right"></i></span>
+            <span class="btn-glow"></span>
+          </a>
+          <button id="inspect-3d-btn" class="cta-secondary magnetic-btn">
+            <i data-lucide="maximize-2"></i>
+            <span>3D ORBIT FREE-LOOK</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="scroll-cue" data-speed="0.15">
+        <div class="mouse-icon">
+          <div class="wheel"></div>
+        </div>
+        <span class="scroll-label">SCROLL TO TRAVEL</span>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         SECTION 2: QUANTUM VOID // CORE
+    =============================================== -->
+    <section class="section quantum-section" id="quantum" data-index="1">
+      <div class="section-badge" data-speed="0.15">
+        <span class="badge-index">02</span>
+        <span class="badge-title">THE QUANTUM CORE</span>
+      </div>
+
+      <div class="section-header-block">
+        <h2 class="section-title text-gradient-main" data-speed="0.2">
+          Multilayer Depth Mechanics
+        </h2>
+        <p class="section-subtitle" data-speed="0.3">
+          Elements accelerate and decelerate at differing mathematical velocities, creating an authentic optical illusion of boundless physical space.
+        </p>
+      </div>
+
+      <!-- 3D Interactive Floating Parallax Cards -->
+      <div class="cards-grid">
+        <div class="parallax-card tilt-card" data-tilt data-speed="0.25">
+          <div class="card-glass-glow"></div>
+          <div class="card-inner">
+            <div class="card-icon-box">
+              <i data-lucide="layers"></i>
+            </div>
+            <div class="card-num">01 / VOLUMETRIC</div>
+            <h3 class="card-heading">Differential Parallax</h3>
+            <p class="card-body">
+              7 concurrent spatial layers decoupled from browser framerates, driven by sub-pixel GPU matrix transforms.
+            </p>
+            <div class="card-telemetry">
+              <span>LATENCY: 0.12ms</span>
+              <span class="tech-accent">CALCULATING</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="parallax-card tilt-card highlighted" data-tilt data-speed="0.55">
+          <div class="card-glass-glow"></div>
+          <div class="card-inner">
+            <div class="card-badge">ACTIVE ENGINE</div>
+            <div class="card-icon-box">
+              <i data-lucide="box"></i>
+            </div>
+            <div class="card-num">02 / THREE.JS</div>
+            <h3 class="card-heading">Procedural 3D Mesh</h3>
+            <p class="card-body">
+              Dynamic geometry responsive to scroll trajectory and cursor coordinates with real-time normal lighting and bloom refraction.
+            </p>
+            <div class="card-telemetry">
+              <span>VERTICES: 12,480</span>
+              <span class="tech-accent">OPTIMIZED</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="parallax-card tilt-card" data-tilt data-speed="0.35">
+          <div class="card-glass-glow"></div>
+          <div class="card-inner">
+            <div class="card-icon-box">
+              <i data-lucide="zap"></i>
+            </div>
+            <div class="card-num">03 / INERTIA</div>
+            <h3 class="card-heading">Smooth Physics</h3>
+            <p class="card-body">
+              Lenis lerped smooth scroll curves simulate viscous fluid momentum, eliminating scroll stuttering across high-refresh monitors.
+            </p>
+            <div class="card-telemetry">
+              <span>DAMPING: 0.082</span>
+              <span class="tech-accent">60-144 FPS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Decorative HUD Glyphs that drift in 3D -->
+      <div class="floating-stat-pill float-1" data-speed="0.7">
+        <i data-lucide="orbit"></i>
+        <span>ACCELERATION: 9.806 m/s²</span>
+      </div>
+      <div class="floating-stat-pill float-2" data-speed="-0.4">
+        <i data-lucide="shield-check"></i>
+        <span>COLLISION: DISSOLVED</span>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         SECTION 3: THE MONOLITHS // 3D ARTIFACTS
+    =============================================== -->
+    <section class="section monolith-section" id="monoliths" data-index="2">
+      <div class="monolith-container">
+        
+        <div class="monolith-info-column">
+          <div class="section-badge" data-speed="0.1">
+            <span class="badge-index">03</span>
+            <span class="badge-title">THE CELESTIAL MONOLITHS</span>
+          </div>
+
+          <h2 class="section-title" data-speed="0.2">
+            Architected in <span class="text-gradient-main">3-Dimensional</span> Perspective
+          </h2>
+
+          <p class="section-subtitle" data-speed="0.3">
+            Observe the crystalline monolith centered in the viewport. As you scroll, camera coordinates interpolate across 3 axes while orbiting shards react to the gravitational field.
+          </p>
+
+          <div class="interactive-controls-strip" data-speed="0.4">
+            <div class="control-box">
+              <label for="wireframe-toggle">WIREFRAME SHADER</label>
+              <button id="wireframe-toggle" class="chip-toggle">
+                <span class="chip-state">OFF</span>
+              </button>
+            </div>
+            <div class="control-box">
+              <label for="rotation-speed">ROTATION MOMENTUM</label>
+              <input type="range" id="rotation-speed" min="1" max="5" value="2" class="range-slider">
+            </div>
+          </div>
+
+          <div class="spec-list" data-speed="0.45">
+            <div class="spec-row">
+              <span class="spec-title">Mesh Architecture</span>
+              <span class="spec-val">Truncated Icosahedron & Ring Ring</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-title">Shading Algorithm</span>
+              <span class="spec-val">Fresnel Edge Glow + Metallic Roughness</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-title">Particle Cloud</span>
+              <span class="spec-val">3,500 Star Coordinates</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="monolith-display-spacer" data-speed="0.1">
+          <!-- 3D Canvas visual anchor -->
+          <div class="canvas-reticle">
+            <div class="reticle-border"></div>
+            <div class="reticle-label">TARGET ACQUIRED // CORE ARTIFACT</div>
+            <div class="reticle-corner top-left"></div>
+            <div class="reticle-corner top-right"></div>
+            <div class="reticle-corner bottom-left"></div>
+            <div class="reticle-corner bottom-right"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==============================================
+         SECTION 4: CONTINUUM // DIMENSION TIMELINE
+    =============================================== -->
+    <section class="section continuum-section" id="continuum" data-index="3">
+      <div class="section-header-block text-center">
+        <div class="section-badge centered" data-speed="0.1">
+          <span class="badge-index">04</span>
+          <span class="badge-title">TEMPORAL CONTINUUM</span>
+        </div>
+        <h2 class="section-title text-gradient-main" data-speed="0.2">
+          Stages of the Journey
+        </h2>
+        <p class="section-subtitle centered" data-speed="0.3">
+          Traverse each layer of space. Foreground indicators glide while background celestial bodies drift in deep parallax suspension.
+        </p>
+      </div>
+
+      <div class="continuum-timeline">
+        <div class="timeline-line"></div>
+
+        <!-- Stage 01 -->
+        <div class="timeline-node" data-speed="0.15">
+          <div class="node-marker">
+            <span class="marker-glow"></span>
+            <span class="marker-core">01</span>
+          </div>
+          <div class="node-content tilt-card" data-tilt>
+            <div class="node-badge">ALTITUDE 000 KM</div>
+            <h4 class="node-title">Atmospheric Egress</h4>
+            <p class="node-desc">Leaving the physical biosphere. Initial parallax layers engage as gravity transitions into orbital velocity.</p>
+          </div>
+        </div>
+
+        <!-- Stage 02 -->
+        <div class="timeline-node reverse" data-speed="0.35">
+          <div class="node-marker">
+            <span class="marker-glow"></span>
+            <span class="marker-core">02</span>
+          </div>
+          <div class="node-content tilt-card" data-tilt>
+            <div class="node-badge">ALTITUDE 12,000 KM</div>
+            <h4 class="node-title">Quantum Tunnel Entrance</h4>
+            <p class="node-desc">Particle streams elongate into warp lines. Three.js camera shifts to extreme perspective projection.</p>
+          </div>
+        </div>
+
+        <!-- Stage 03 -->
+        <div class="timeline-node" data-speed="0.2">
+          <div class="node-marker">
+            <span class="marker-glow"></span>
+            <span class="marker-core">03</span>
+          </div>
+          <div class="node-content tilt-card" data-tilt>
+            <div class="node-badge">ALTITUDE 148,000 LY</div>
+            <h4 class="node-title">Interstellar Nexus</h4>
+            <p class="node-desc">Entering the cosmic lattice where time dilation curves space-time vectors into radiant light spirals.</p>
+          </div>
+        </div>
+
+        <!-- Stage 04 -->
+        <div class="timeline-node reverse" data-speed="0.4">
+          <div class="node-marker">
+            <span class="marker-glow"></span>
+            <span class="marker-core">04</span>
+          </div>
+          <div class="node-content tilt-card" data-tilt>
+            <div class="node-badge">ALTITUDE INFINITE</div>
+            <h4 class="node-title">Singularity Convergence</h4>
+            <p class="node-desc">Complete unification of geometry and sound. All parallax planes merge into the event horizon.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==============================================
+         SECTION 5: SINGULARITY // INTERACTIVE HORIZON
+    =============================================== -->
+    <section class="section singularity-section" id="singularity" data-index="4">
+      <div class="singularity-glow"></div>
+
+      <div class="singularity-inner">
+        <div class="section-badge centered" data-speed="0.1">
+          <span class="badge-index">05</span>
+          <span class="badge-title">THE EVENT HORIZON</span>
+        </div>
+
+        <h2 class="singularity-heading" data-speed="0.2">
+          BEYOND THE <span class="text-gradient-main">THRESHOLD</span>
+        </h2>
+
+        <p class="singularity-sub" data-speed="0.3">
+          You have traversed the multi-dimensional parallax continuum. Click and drag anywhere in the space below to bend the particle gravity well.
+        </p>
+
+        <!-- Interactive Sandbox Canvas Trigger -->
+        <div class="sandbox-action-bar" data-speed="0.4">
+          <button id="hyperdrive-btn" class="hyperdrive-btn magnetic-btn">
+            <i data-lucide="rocket"></i>
+            <span>TRIGGER HYPERDRIVE BURST</span>
+          </button>
+          
+          <button id="gravity-pulse-btn" class="secondary-pulse-btn magnetic-btn">
+            <i data-lucide="sparkles"></i>
+            <span>GRAVITATIONAL SHOCKWAVE</span>
+          </button>
+        </div>
+
+        <!-- Metric Counter Grid -->
+        <div class="metrics-grid" data-speed="0.45">
+          <div class="metric-card">
+            <div class="metric-number" data-target="99.98">0.00</div>
+            <div class="metric-unit">%</div>
+            <div class="metric-desc">FPS Stability Index</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-number" data-target="7">0</div>
+            <div class="metric-unit">Planes</div>
+            <div class="metric-desc">Independent Depth Fields</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-number" data-target="4000">0</div>
+            <div class="metric-unit">+</div>
+            <div class="metric-desc">Dynamic 3D Stellar Bodies</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-number" data-target="0">0</div>
+            <div class="metric-unit">ms</div>
+            <div class="metric-desc">Perceived Scroll Lag</div>
+          </div>
+        </div>
+
+        <!-- Footer Card & Credits -->
+        <footer class="experience-footer">
+          <div class="footer-top">
+            <div class="footer-brand">
+              <span class="brand-glyph">✦</span>
+              <span class="brand-text">AETHERIA 3D</span>
+            </div>
+            <p class="footer-mission">
+              Engineered for the Interactive Parallax Scrolling Page Challenge. Built with Three.js, GSAP ScrollTrigger, Lenis Inertial Physics, and Web Audio API.
+            </p>
+          </div>
+          <div class="footer-bottom">
+            <div class="footer-copy">© 2026 AETHERIA INTERACTIVE • ALL DIMENSIONS RESERVED</div>
+            <a href="#hero" class="back-to-top magnetic-btn">
+              <span>RETURN TO GENESIS</span>
+              <i data-lucide="arrow-up"></i>
+            </a>
+          </div>
+        </footer>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
